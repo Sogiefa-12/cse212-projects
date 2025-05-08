@@ -10,7 +10,28 @@ public static class ArraySelector
     }
 
     private static int[] ListSelector(int[] list1, int[] list2, int[] select)
+     {
+    var result = new List<int>();
+    for (int i = 0; i < select.Length; i++)
     {
-        return [];
+        switch (select[i])
+        {
+            case 1:
+                if (i < list1.Length)
+                {
+                    result.Add(list1[i]);
+                }
+                break;
+            case 2:
+                if (i < list2.Length)
+                {
+                    result.Add(list2[i]);
+                }
+                break;
+            default:
+                throw new ArgumentException("Invalid value in selector array");
+        }
+    }
+    return result.ToArray();
     }
 }
