@@ -2,7 +2,6 @@
     private static bool IsFloat(string text) {
         return float.TryParse(text, out _);
     }
-
     public static float Run(string text) {
         var stack = new Stack<float>();
         foreach (var item in text.Split(' ')) {
