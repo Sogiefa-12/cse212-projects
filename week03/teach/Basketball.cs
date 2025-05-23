@@ -19,18 +19,48 @@ public class Basketball
     {
         var players = new Dictionary<string, int>();
 
-        using var reader = new TextFieldParser("basketball.csv");
+        using var reader = new TextFieldParser("C:/Users/user/Desktop/cse212/cse212-projects/week03/teach/basketball.csv");
         reader.TextFieldType = FieldType.Delimited;
         reader.SetDelimiters(",");
         reader.ReadFields(); // ignore header row
+
         while (!reader.EndOfData) {
             var fields = reader.ReadFields()!;
             var playerId = fields[0];
             var points = int.Parse(fields[8]);
+
+            if (players.ContainsKey(playerId))
+            {
+                players[playerId] += points;
+            }
+            else
+            {
+                players.Add(playerId, points);
+            }
+
         }
+        // Sort the players by points in descending order
+        var sortedPlayers = players.OrderByDescending(pair => pair.Value).ToList();
+        // Get the top 10 players
+        var topPlayers = sortedPlayers.Take(10).Select(player => player.Key).ToArray();
 
-        Console.WriteLine($"Players: {{{string.Join(", ", players)}}}");
+       
+        // Console.WriteLine($"Players: {{{string.Join(", ", players)}}}");
 
-        var topPlayers = new string[10];
+        Console.WriteLine($"Top 10 Players: {{{string.Join(", ", topPlayers)}}}");
+        Console.WriteLine($"Top 10 Players Points: {{{string.Join(", ", topPlayers.Select(player => players[player]))}}}");
+        // Print the top 10 players and their points
+        Console.WriteLine("Using Map to Display Top 10 Players and their points:");
+        foreach (var player in topPlayers)
+        {
+            Console.WriteLine($"{player}: {players[player]}");
+        }
+        // Print the total number of players
+        Console.WriteLine($"Total number of players: {players.Count}");
+        // Print the total number of points
+        var totalPoints = players.Values.Sum();
+        Console.WriteLine($"Total number of points: {totalPoints}");
+        
+        
     }
 }

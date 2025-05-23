@@ -32,7 +32,7 @@
        HashSet<char> uniqueCharacters = new HashSet<char>();
 
        // Iterate over the characters in the text
-       foreach (char character in text)
+       foreach (char character in text) // I am using a forech loop
        {
         // if the character is already present in the HashSet, its a duplicate
         if (!uniqueCharacters.Add(character))

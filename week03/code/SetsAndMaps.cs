@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Collections.Generic;
 
 public static class SetsAndMaps
 {
@@ -22,8 +23,38 @@ public static class SetsAndMaps
     public static string[] FindPairs(string[] words)
     {
         // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        // 1. Create a set of the words
+        HashSet<string> wordSet = new HashSet<string>(words);
+        HashSet<string> charSet = new HashSet<string>();
+        
+        // 2. Create a list to store the pairs
+
+        List<string> pairs = new List<string>();
+
+        // create a loop to loop through the set
+
+        foreach (string word in words)
+        {
+            // create  a string to hold the reverse of the word
+            string reverseWord = string.Join("", word.Reverse());
+            // check if the reverse word is in the set
+            if (word != reverseWord && wordSet.Contains(reverseWord))
+            {
+                // check if the reverse word is not in the list
+                if (!pairs.Contains(reverseWord + " & " + word))
+                {
+                    // add the pair to the list
+                    pairs.Add($"{word} & {reverseWord}");
+                }
+            }
+
+        }
+
+        return pairs.ToArray();
     }
+
+
+
 
     /// <summary>
     /// Read a census file and summarize the degrees (education)
@@ -39,10 +70,30 @@ public static class SetsAndMaps
     public static Dictionary<string, int> SummarizeDegrees(string filename)
     {
         var degrees = new Dictionary<string, int>();
-        foreach (var line in File.ReadLines(filename))
+        foreach (var line in File.ReadLines("C:/Users/user/Desktop/cse212/cse212-projects/week03/code/census.txt"))
         {
-            var fields = line.Split(",");
             // TODO Problem 2 - ADD YOUR CODE HERE
+            // 1. Spilt the line into fields using the comma as a delimiter
+
+            var fields = line.Split(",");
+
+            // 2. Get the degree from the 4th column
+            string degree = fields[3].Trim();
+
+            // 3. Check if the degree is already in the dictionary
+            if (degrees.ContainsKey(degree))
+            {
+                // 4. If it is, increment the value by 1
+                degrees[degree]++;
+            }
+            else
+            {
+                // 5. if it is not, add it to the dictionary with a value of 1
+                degrees[degree] = 1;
+            }
+
+
+
         }
 
         return degrees;
@@ -67,7 +118,49 @@ public static class SetsAndMaps
     public static bool IsAnagram(string word1, string word2)
     {
         // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        // converts both words to lower case and removes spaces
+        word1 = word1.ToLower().Replace(" ", "");
+        word2 = word2.ToLower().Replace(" ", "");
+
+        // check if the lenghts of the words are the same
+        if (word1.Length != word2.Length)
+        {
+            return false;
+        }
+
+        // create a dictionary to store the letters and their counts
+        var letterCounts = new Dictionary<char, int>();
+
+        // loop through the first word and add the letters to the dictionary, by counting letters in word1
+        foreach (char letter in word1)
+        {
+            // if the letter exist, increment the count
+            if (letterCounts.ContainsKey(letter))
+            {
+                letterCounts[letter]++;
+            }
+            // if the letter does not exist, add it to the dictionary with a count of 1
+            else
+            {
+                letterCounts[letter] = 1;
+            }
+        }
+        // loop through the second word and check if the letters are in the dictionary, by counting letters in word2
+        foreach (char letter in word2)
+        {
+            // If the letter does not exist or the count becomes 0, return false
+            if (!letterCounts.ContainsKey(letter) || letterCounts[letter] == 0)
+            {
+                return false;
+            }
+            else
+            {
+                // if the letter exists, decrement the count
+                letterCounts[letter]--;
+            }
+        }
+        // if all letter counts are zero, the words are anagrams
+        return letterCounts.Values.All(count => count == 0);
     }
 
     /// <summary>
@@ -92,15 +185,29 @@ public static class SetsAndMaps
         using var jsonStream = client.Send(getRequestMessage).Content.ReadAsStream();
         using var reader = new StreamReader(jsonStream);
         var json = reader.ReadToEnd();
-        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
+        // Deserialize the JSON data into a FeatureCollection object
+
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
 
-        // TODO Problem 5:
-        // 1. Add code in FeatureCollection.cs to describe the JSON using classes and properties 
-        // on those classes so that the call to Deserialize above works properly.
-        // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
-        // 3. Return an array of these string descriptions.
-        return [];
+        List<string> earthquakeDescriptions = new List<string>();
+
+        foreach (var feature in featureCollection.Features)
+        {
+            // Parse magnitude string as a decimal
+        if (decimal.TryParse(feature.Properties.Magnitude, out decimal magnitude))
+            {
+                string place = feature.Properties.Location;
+                string description = $"{place}, Mag {magnitude:0.00}";
+                earthquakeDescriptions.Add(description);
+            }
+        }
+
+        Console.WriteLine($"Number of earthquake descriptions: {earthquakeDescriptions.Count}");
+        return earthquakeDescriptions.ToArray();
     }
+
+
+
 }
