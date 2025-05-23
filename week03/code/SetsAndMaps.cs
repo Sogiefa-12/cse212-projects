@@ -177,16 +177,15 @@ public static class SetsAndMaps
     /// https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
     /// 
     /// </summary>
-    public static string[] EarthquakeDailySummary()
+     public static string[] EarthquakeDailySummary()
     {
         const string uri = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson";
+
         using var client = new HttpClient();
         using var getRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
         using var jsonStream = client.Send(getRequestMessage).Content.ReadAsStream();
         using var reader = new StreamReader(jsonStream);
         var json = reader.ReadToEnd();
-
-        // Deserialize the JSON data into a FeatureCollection object
 
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var featureCollection = JsonSerializer.Deserialize<FeatureCollection>(json, options);
@@ -195,16 +194,12 @@ public static class SetsAndMaps
 
         foreach (var feature in featureCollection.Features)
         {
-            // Parse magnitude string as a decimal
-        if (decimal.TryParse(feature.Properties.Magnitude, out decimal magnitude))
-            {
-                string place = feature.Properties.Location;
-                string description = $"{place}, Mag {magnitude:0.00}";
-                earthquakeDescriptions.Add(description);
-            }
+            string location = feature.Properties.Location;
+            decimal magnitude = feature.Properties.Magnitude;
+            string description = $"{location}, - Mag {magnitude:0.00}";
+            earthquakeDescriptions.Add(description);
         }
 
-        Console.WriteLine($"Number of earthquake descriptions: {earthquakeDescriptions.Count}");
         return earthquakeDescriptions.ToArray();
     }
 

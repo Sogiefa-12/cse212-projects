@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
     // 1. Create a class called FeatureCollection
 
 
+
 public class Feature
 {
     public Properties Properties { get; set; }
@@ -11,8 +12,11 @@ public class Feature
 
 public class Properties
 {
+    [JsonPropertyName("place")]
     public string Location { get; set; }
-    public string Magnitude { get; set; }
+
+    [JsonPropertyName("mag")]
+    public decimal Magnitude { get; set; }
 }
 
 public class FeatureCollection
