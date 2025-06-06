@@ -15,7 +15,13 @@ public static class Recursion
     public static int SumSquaresRecursive(int n)
     {
         // TODO Start Problem 1
-        return 0;
+        // Base case: if n is less than or equal to 0, return 0
+        if (n <= 0)
+        {
+            return 0;
+        }
+        // Recursive case: return n^2 + SumSquaresRecursive(n - 1)
+        return n * n + SumSquaresRecursive(n - 1);
     }
 
     /// <summary>
@@ -40,6 +46,26 @@ public static class Recursion
     public static void PermutationsChoose(List<string> results, string letters, int size, string word = "")
     {
         // TODO Start Problem 2
+
+        if (size == 0)
+        {
+            // Base case: if size is 0, add the current word to results
+            results.Add(word);
+            return;
+        }
+
+        // Recursive case: iterate through each letter in the letters string
+        for (int i = 0; i < letters.Length; i++)
+        {
+            // Choose the current letter and append it to the word
+            string newWord = word + letters[i];
+
+            // Create a new string without the chosen letter
+            string remainingLetters = letters.Remove(i, 1);
+
+            // Recur with the remaining letters and reduced size
+            PermutationsChoose(results, remainingLetters, size - 1, newWord);
+        }
     }
 
     /// <summary>
@@ -87,19 +113,46 @@ public static class Recursion
     public static decimal CountWaysToClimb(int s, Dictionary<int, decimal>? remember = null)
     {
         // Base Cases
-        if (s == 0)
-            return 0;
-        if (s == 1)
-            return 1;
-        if (s == 2)
-            return 2;
-        if (s == 3)
-            return 4;
+        if (s <= 3 )
+        {
+            switch (s)
+            {
+                case 0:
+                    return 1; // 1 way to stay at the ground (do nothing)
+                case 1:
+                    return 1; // 1 way to climb 1 stair (1 step)
+                case 2:
+                    return 2; // 2 ways to climb 2 stairs (1+1 or 2)
+                case 3:
+                    return 4; // 4 ways to climb 3 stairs (1+1+1, 1+2, 2+1, or 3)
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        
+
+         // If the remember dictionary is null, initialize it
+        if (remember == null)
+        {
+            remember = new Dictionary<int, decimal>();
+        }
 
         // TODO Start Problem 3
 
         // Solve using recursion
-        decimal ways = CountWaysToClimb(s - 1) + CountWaysToClimb(s - 2) + CountWaysToClimb(s - 3);
+
+        // If the remember dictionary is null, initialize it
+        if (remember.ContainsKey(s))
+        {
+            // If we have already calculated the number of ways to climb 's' stairs, return it
+            return remember[s];
+        }
+        // calculate the result for s
+         decimal ways = CountWaysToClimb(s - 1, remember) + CountWaysToClimb(s - 2, remember) + CountWaysToClimb(s - 3, remember);
+        
+        // store the result in the remember dictionary
+        remember[s] = ways;
+
         return ways;
     }
 
@@ -116,28 +169,92 @@ public static class Recursion
     /// Using recursion, insert all possible binary strings for a given pattern into the results list.  You might find 
     /// some of the string functions like IndexOf and [..X] / [X..] to be useful in solving this problem.
     /// </summary>
-    public static void WildcardBinary(string pattern, List<string> results)
+     public static void WildcardBinary(string pattern, List<string> results)
     {
         // TODO Start Problem 4
+        WildcardBinaryRecursive(pattern, "", results);
     }
 
+    private static void WildcardBinaryRecursive(string pattern, string result, List<string> results)
+    {
+        // If the pattern is empty, we found a result
+        if (pattern.Length == 0)
+        {
+            results.Add(result);
+            return;
+        }
+
+        // Process the next character in the pattern
+        char currentChar = pattern[0];
+        string remainingPattern = pattern.Substring(1);
+
+        // If we encounter a '0', there's only one possibility
+        if (currentChar == '0')
+        {
+            WildcardBinaryRecursive(remainingPattern, result + "0", results);
+        }
+        // If we encounter a '1', there's only one possibility
+        else if (currentChar == '1')
+        {
+            WildcardBinaryRecursive(remainingPattern, result + "1", results);
+        }
+        // If we encounter a '*', we need to try both '0' and '1'
+        else if (currentChar == '*')
+        {
+            WildcardBinaryRecursive(remainingPattern, result + "0", results);
+            WildcardBinaryRecursive(remainingPattern, result + "1", results);
+        }
+    }
     /// <summary>
     /// Use recursion to insert all paths that start at (0,0) and end at the
     /// 'end' square into the results list.
     /// </summary>
-    public static void SolveMaze(List<string> results, Maze maze, int x = 0, int y = 0, List<ValueTuple<int, int>>? currPath = null)
+
+    public static void SolveMaze(List<string> results, Maze maze, int startX = 0, int startY = 0, List<ValueTuple<int, int>> path = null)
+    // To do problem 5
     {
-        // If this is the first time running the function, then we need
-        // to initialize the currPath list.
-        if (currPath == null) {
-            currPath = new List<ValueTuple<int, int>>();
+        if (maze.IsEnd(startX, startY))
+        {
+            results.Add(FormatPath(path));
+            return;
         }
-        
-        // currPath.Add((1,2)); // Use this syntax to add to the current path
 
-        // TODO Start Problem 5
-        // ADD CODE HERE
+        path ??= new List<ValueTuple<int, int>>() { (startX, startY) };
 
-        // results.Add(currPath.AsString()); // Use this to add your path to the results array keeping track of complete maze solutions when you find the solution.
+        foreach (var position in GetValidNeighbors(maze, path, startX, startY))
+        {
+            var newPath = new List<ValueTuple<int, int>>(path);
+            newPath.Add(position);
+
+            SolveMaze(results, maze, position.Item1, position.Item2, newPath);
+        }
     }
+
+    private static string FormatPath(List<ValueTuple<int, int>> path)
+    {
+        var formattedPath = "<List>{";
+        foreach (var pos in path)
+        {
+            formattedPath += $"({pos.Item1}, {pos.Item2})";
+            if (pos != path.Last())
+            {
+                formattedPath += ", ";
+            }
+        }
+        formattedPath += "}";
+        return formattedPath;
+    }
+
+    private static IEnumerable<ValueTuple<int, int>> GetValidNeighbors(Maze maze, List<ValueTuple<int, int>> path, int x, int y)
+    {
+        var positions = new (int x, int y)[4];
+        positions[0] = (x - 1, y); // Up
+        positions[1] = (x + 1, y); // Down
+        positions[2] = (x, y - 1); // Left
+        positions[3] = (x, y + 1); // Right
+        return positions.Where(pos => maze.IsValidMove(path, pos.Item1, pos.Item2));
+    }
+
+         
+
 }
