@@ -72,15 +72,27 @@ public class BinarySearchTree : IEnumerable<int>
     {
         var numbers = new List<int>();
         TraverseBackward(_root, numbers);
-        foreach (var number in numbers)
-        {
-            yield return number;
-        }
+        return numbers;
     }
 
     private void TraverseBackward(Node? node, List<int> values)
     {
         // TODO Problem 3
+        if (node == null)
+        {
+            return; // Base case: if the node is null, return
+        }
+
+        
+
+        //The traverse the left subtree
+        TraverseBackward(node.Left, values);
+
+        // Add the current node's value to the list of values
+        values.Insert(0, node.Data); // Insert at the beginning to reverse the order
+
+        // Traverse the left subtree first
+        TraverseBackward(node.Right, values);
     }
 
     /// <summary>
